@@ -3,6 +3,7 @@
 //
 //  Jean Goulet  14-11-26.
 //  Copyleft 2014 UdeS
+//  Modification: Isaac Ouellet Therrien (14056950) && Félix Hamel ()
 //
 
 #ifndef Hash_ensemble_h
