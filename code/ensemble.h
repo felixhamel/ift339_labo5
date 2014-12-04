@@ -177,9 +177,10 @@ void ensemble_sans_ordre<TYPE>::erase(const TYPE& x)
 template <typename TYPE>
 void ensemble_sans_ordre<TYPE>::erase(typename ensemble_sans_ordre<TYPE>::iterator it)
 {
-  // A IMPLANTER!
-  //it.ENS[it.ALV].erase(it);
-  //SIZE--;
+	delete *it.POS; 
+	REP[it.ALV].erase(it.POS);
+  --SIZE;
+  
 }
 
 
@@ -219,34 +220,8 @@ typename ensemble_sans_ordre<TYPE>::iterator ensemble_sans_ordre<TYPE>::end()
 template <typename TYPE>
 void ensemble_sans_ordre<TYPE>::rehash()
 {
-  using namespace std;
-
-  cout << REP.size() << " " << REP.capacity() << endl;
-
   if(SIZE < FACTEUR_DE_CHARGE * REP.size())return;
-  REP.resize((REP.capacity() > 0 ? REP.capacity() * 2 : 4));
-
-  // Vérifier que tous nos aveoles sont en bas ou égal au facteur de charge
-  for(std::vector<std::list<TYPE*>>::iterator it = REP.begin(); it != REP.end(); ++it) {
-    if(it.size() > FACTEUR_DE_CHARGE) {
-      // Trouver un avéole ayant un facteur de charge plus petit
-      for(std::vector<std::list<TYPE*>>::iterator it2 = REP.begin(); it2 != REP.end(); ++it2) {
-        if(it2.size() < FACTEUR_DE_CHARGE) {
-          while(it.size() > FACTEUR_DE_CHARGE) {
-
-          }
-          it2.insert(*it);
-
-        }
-      }
-    }
-  }
-
-  return;
-
-  //A IMPLANTER
-  cout << "Coucou" << endl;
-
+  REP.resize(4);
 }
 
 
@@ -275,7 +250,24 @@ void ensemble_sans_ordre<TYPE>::iterator::avancer()
 template <typename TYPE>
 void ensemble_sans_ordre<TYPE>::iterator::reculer()
 {
-  //A IMPLANTER!
+	/*Si on est à la fin de l'ensemble*/
+	if(ALV==ENS->REP.size()){
+		--ALV;
+		POS = ENS->REP[ALV].end();
+	}
+	/*Si on est au début d'une liste du vecteur*/
+	if(POS==ENS->REP[ALV].begin()){
+		for(--ALV;ALV>=0;--ALV){
+			if(ALV > ENS->REP.size())return;
+			POS = ENS->REP[ALV].end();
+			if(POS != ENS->REP[ALV].begin()){
+				--POS;
+				return;
+			}
+		}
+		/*Si nous ne sommes dans une liste de vecteur*/
+	}else{--POS;}
+
 }
 
 template <typename TYPE>
