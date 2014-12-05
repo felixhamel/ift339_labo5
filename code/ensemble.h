@@ -70,6 +70,13 @@ public:
     bool operator!=(const iterator&)const;
 };
 
+/*template <typename TYPE>
+struct std::hash<TYPE> {
+  size_t operator()(const TYPE &object) const{
+    return object;
+  }
+};*/
+
 ////////////////////////////////////////////////////////////////
 // definition des fonctions de la classe ensemble_sans_ordre
 
@@ -79,7 +86,7 @@ template <typename TYPE>
 ensemble_sans_ordre<TYPE>::ensemble_sans_ordre()
 {
   SIZE = 0;
-  FACTEUR_DE_CHARGE = 2.0;
+  FACTEUR_DE_CHARGE = 1.0;
 }
 
 template <typename TYPE>
@@ -135,6 +142,7 @@ typename ensemble_sans_ordre<TYPE>::iterator
 ensemble_sans_ordre<TYPE>::find(const TYPE& x)
 {
   typename ensemble_sans_ordre<TYPE>::iterator retour = end();
+  if(empty())return retour;
   auto disperseur = std::hash<TYPE>();
   size_t alv = disperseur(x) % REP.size();
   std::list<TYPE*>& alveole = REP[alv];
@@ -219,34 +227,41 @@ typename ensemble_sans_ordre<TYPE>::iterator ensemble_sans_ordre<TYPE>::end()
 template <typename TYPE>
 void ensemble_sans_ordre<TYPE>::rehash()
 {
-  using namespace std;
+  if(SIZE < FACTEUR_DE_CHARGE * REP.size()) return;
+  if(REP.size() == 0) { REP.resize(1); return; }
 
-  cout << REP.size() << " " << REP.capacity() << endl;
+  // Calculer le taux de charge moyen de toutes les alvéoles
+  float charge_moyenne = 0.f;
+  for(auto j = REP.begin(); j != REP.end(); ++j) {
+    charge_moyenne += j->size();
+  }
+  charge_moyenne /= REP.size();
 
-  if(SIZE < FACTEUR_DE_CHARGE * REP.size())return;
-  REP.resize((REP.capacity() > 0 ? REP.capacity() * 2 : 4));
+  /*
+    Si la charge moyenne de toutes les alvéoles réunies est > que
+    le facteur de charge, alors on va créer un nouveau vecteur avec un
+    plus grand nombre d'alvéole et mettre les données du vecteur actuel
+    dans le nouveau vecteur en utilisant le hashing pour trouver la meilleure
+    alvéole placer la donnée.
+   */
+  if(charge_moyenne > FACTEUR_DE_CHARGE) {
 
-  // Vérifier que tous nos aveoles sont en bas ou égal au facteur de charge
-  for(std::vector<std::list<TYPE*>>::iterator it = REP.begin(); it != REP.end(); ++it) {
-    if(it.size() > FACTEUR_DE_CHARGE) {
-      // Trouver un avéole ayant un facteur de charge plus petit
-      for(std::vector<std::list<TYPE*>>::iterator it2 = REP.begin(); it2 != REP.end(); ++it2) {
-        if(it2.size() < FACTEUR_DE_CHARGE) {
-          while(it.size() > FACTEUR_DE_CHARGE) {
+    // Notre nouveau vecteur
+    std::vector<std::list<TYPE*>> nouveau_vecteur;
+    nouveau_vecteur.resize(FACTEUR_DE_CHARGE * REP.size() + 1);
 
-          }
-          it2.insert(*it);
+    std::hash<TYPE*> hasheur;
 
-        }
+    // Aller chercher tous les éléments de l'ancien vecteyr REP et
+    // aller les mettre dans le nouveau.
+    for(auto alveolIt = REP.begin(); alveolIt != REP.end(); ++alveolIt) {
+      for(auto it = alveolIt->begin(); it != alveolIt->end(); ++it) {
+        size_t indice = hasheur(*it);
+        nouveau_vecteur[indice % nouveau_vecteur.size()].push_back(*it);
       }
     }
+    REP = nouveau_vecteur;
   }
-
-  return;
-
-  //A IMPLANTER
-  cout << "Coucou" << endl;
-
 }
 
 
