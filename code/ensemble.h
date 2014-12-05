@@ -3,6 +3,7 @@
 //
 //  Jean Goulet  14-11-26.
 //  Copyleft 2014 UdeS
+//  Modification: Isaac Ouellet Therrien (14056950) && Félix Hamel ()
 //
 
 #ifndef Hash_ensemble_h
@@ -185,9 +186,10 @@ void ensemble_sans_ordre<TYPE>::erase(const TYPE& x)
 template <typename TYPE>
 void ensemble_sans_ordre<TYPE>::erase(typename ensemble_sans_ordre<TYPE>::iterator it)
 {
-  // A IMPLANTER!
-  //it.ENS[it.ALV].erase(it);
-  //SIZE--;
+	delete *it.POS;
+	REP[it.ALV].erase(it.POS);
+  --SIZE;
+
 }
 
 
@@ -290,7 +292,24 @@ void ensemble_sans_ordre<TYPE>::iterator::avancer()
 template <typename TYPE>
 void ensemble_sans_ordre<TYPE>::iterator::reculer()
 {
-  //A IMPLANTER!
+	/*Si on est à la fin de l'ensemble*/
+	if(ALV==ENS->REP.size()){
+		--ALV;
+		POS = ENS->REP[ALV].end();
+	}
+	/*Si on est au début d'une liste du vecteur*/
+	if(POS==ENS->REP[ALV].begin()){
+		for(--ALV;ALV>=0;--ALV){
+			if(ALV > ENS->REP.size())return;
+			POS = ENS->REP[ALV].end();
+			if(POS != ENS->REP[ALV].begin()){
+				--POS;
+				return;
+			}
+		}
+		/*Si nous ne sommes dans une liste de vecteur*/
+	}else{--POS;}
+
 }
 
 template <typename TYPE>
